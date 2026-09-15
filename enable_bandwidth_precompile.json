@@ -1,0 +1,44 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.evm.vm.v1.MsgUpdateParams",
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "params": {
+        "evm_denom": "atest",
+        "extra_eips": [],
+        "evm_channels": [],
+        "access_control": {
+          "create": {
+            "access_type": "ACCESS_TYPE_PERMISSIONLESS",
+            "access_control_list": []
+          },
+          "call": {
+            "access_type": "ACCESS_TYPE_PERMISSIONLESS",
+            "access_control_list": []
+          }
+        },
+        "active_static_precompiles": [
+          "0x0000000000000000000000000000000000000100",
+          "0x0000000000000000000000000000000000000400",
+          "0x0000000000000000000000000000000000000800",
+          "0x0000000000000000000000000000000000000801",
+          "0x0000000000000000000000000000000000000802",
+          "0x0000000000000000000000000000000000000803",
+          "0x0000000000000000000000000000000000000804",
+          "0x0000000000000000000000000000000000000805",
+          "0x0000000000000000000000000000000000000806",
+          "0x0000000000000000000000000000000000000807",
+          "0x0000000000000000000000000000000000000808"
+        ],
+        "history_serve_window": "8192",
+        "extended_denom_options": {
+          "extended_denom": "stake"
+        }
+      }
+    }
+  ],
+  "metadata": "enable bandwidth precompile",
+  "deposit": "10000000atest",
+  "title": "Enable bandwidth precompile",
+  "summary": "Add the bandwidth module precompile (0x...808) to active_static_precompiles"
+}

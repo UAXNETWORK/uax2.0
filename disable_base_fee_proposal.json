@@ -1,0 +1,21 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.evm.feemarket.v1.MsgUpdateParams",
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "params": {
+        "no_base_fee": true,
+        "base_fee_change_denominator": 8,
+        "elasticity_multiplier": 2,
+        "enable_height": "0",
+        "base_fee": "0.000000000000000000",
+        "min_gas_price": "0.000000000000000000",
+        "min_gas_multiplier": "0.500000000000000000"
+      }
+    }
+  ],
+  "metadata": "",
+  "deposit": "10000000atest",
+  "title": "Disable dynamic base fee",
+  "summary": "Set no_base_fee=true so gas price is always zero; the flat 212-unit bandwidth AnteHandler becomes the sole per-tx cost mechanism, matching UAX Network's DePIN bandwidth-based design."
+}

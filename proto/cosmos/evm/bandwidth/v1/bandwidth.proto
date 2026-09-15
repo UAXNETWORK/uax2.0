@@ -1,0 +1,45 @@
+syntax = "proto3";
+package cosmos.evm.bandwidth.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/cosmos/evm/x/bandwidth/types";
+
+// Params defines the bandwidth module parameters.
+message Params {
+  option (amino.name) = "cosmos/evm/x/bandwidth/Params";
+
+  // bandwidth_per_share is the amount of atest minted for each submitted share.
+  string bandwidth_per_share = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+  // daily_topup_amount is minted to a registered device's owner once per day
+  // if that owner's spendable balance is zero.
+  string daily_topup_amount = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// Device represents a registered ESP32 device on-chain.
+message Device {
+  option (amino.name) = "cosmos/evm/x/bandwidth/Device";
+
+  // device_id uniquely identifies the physical device (e.g. its MAC address).
+  string device_id = 1;
+  // owner is the wallet address credited with minted bandwidth for this
+  // device's shares.
+  string owner = 2;
+  // public_key is the device's secp256k1 public key (compressed, 33 bytes),
+  // used to verify share submissions signed by the device's private key.
+  bytes public_key = 3;
+  // last_nonce is the highest accepted share-submission nonce (replay guard).
+  uint64 last_nonce = 4;
+  // last_topup_time is the unix timestamp of the last daily zero-balance
+  // top-up paid to this device's owner.
+  int64 last_topup_time = 5;
+}

@@ -1,0 +1,82 @@
+syntax = "proto3";
+package cosmos.evm.bandwidth.v1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/cosmos/evm/x/bandwidth/types";
+
+// Msg defines the bandwidth Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // RegisterDevice registers a new ESP32 device, linking its public key to an
+  // owner wallet. Only the owner needs to sign this transaction.
+  rpc RegisterDevice(MsgRegisterDevice) returns (MsgRegisterDeviceResponse);
+
+  // SubmitShare relays a device-signed share submission. Anyone (e.g. a relay
+  // server) can broadcast this transaction and pay its normal fees; the share
+  // is only accepted if `signature` verifies against the registered device's
+  // public key, so the relayer cannot forge shares.
+  rpc SubmitShare(MsgSubmitShare) returns (MsgSubmitShareResponse);
+
+  // UnregisterDevice removes a device's on-chain registration. Only the
+  // device's registered owner can unregister it. This does not affect the
+  // physical device or any already-minted rewards; the device simply can no
+  // longer submit shares (SubmitShare) until it is registered again.
+  rpc UnregisterDevice(MsgUnregisterDevice) returns (MsgUnregisterDeviceResponse);
+}
+
+message MsgRegisterDevice {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "cosmos/evm/x/bandwidth/MsgRegisterDevice";
+
+  string owner = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string device_id = 2;
+  bytes public_key = 3;
+  // device_signature is a proof-of-possession check (security fix, 8 Sep
+  // 2026 chain audit finding #1): the device itself must sign
+  // "register:{device_id}:{owner}" (owner as "0x" + lowercase hex, the
+  // format the ESP32 setup page produces) with its own private key,
+  // verified against public_key in RegisterDevice below. Without this,
+  // anyone who merely observed device_id + public_key - both printed in
+  // plaintext on the device's own setup page and Serial Monitor boot log -
+  // could front-run registration under their own wallet and permanently
+  // hijack (or DoS) that device's future rewards.
+  bytes device_signature = 4;
+}
+
+message MsgRegisterDeviceResponse {}
+
+message MsgSubmitShare {
+  option (cosmos.msg.v1.signer) = "relayer";
+  option (amino.name) = "cosmos/evm/x/bandwidth/MsgSubmitShare";
+
+  // relayer signs and pays for this transaction; it does NOT need to be the
+  // device's owner and cannot forge shares (see signature below).
+  string relayer = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string device_id = 2;
+  uint32 share_count = 3;
+  uint64 nonce = 4;
+  // signature is the device's ECDSA signature over
+  // sha256("{device_id}|{share_count}|{nonce}"), made with the device's own
+  // private key (never leaves the device).
+  bytes signature = 5;
+}
+
+message MsgSubmitShareResponse {
+  string minted_amount = 1;
+}
+
+message MsgUnregisterDevice {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "cosmos/evm/x/bandwidth/MsgUnregisterDevice";
+
+  // owner must match the device's currently-registered owner.
+  string owner = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string device_id = 2;
+}
+
+message MsgUnregisterDeviceResponse {}
